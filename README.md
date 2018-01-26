@@ -5,7 +5,7 @@ It is working but still some of the features are not implemented such as:
 ```
 ```
 > Using custom sprites of different sizes
-> drag and draw.</li>
+> drag and draw.
 > Save to File
 ```
 <b>Different texture sizes are supported but, you would have to manually edit cfg file to define your coordinates as per your source image.</b>
