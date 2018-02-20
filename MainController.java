@@ -45,6 +45,11 @@ import javafx.geometry.Pos;
 import javafx.scene.text.Font;
 import javafx.beans.value.ObservableValue;
 import javafx.stage.StageStyle;
+import javafx.stage.Window;
+import java.util.Properties;
+import java.io.FileReader;
+import java.io.File;
+import java.io.FileWriter;
 
 
 public class MainController {
@@ -52,6 +57,12 @@ public class MainController {
 
     canvas = new GridPane();
     canvas.setGridLinesVisible(true);
+    try {
+      propfile.createNewFile();
+      FileReader reader = new FileReader(new File("Editor.prop"));
+      LevelEditorProperties.load(reader);
+      reader.close();
+    } catch (Exception fne) {}
     levelArea.prefWidthProperty().bind(MainWindow.widthProperty().subtract(400));
     levelArea.setContent(canvas);
     headUp.setId("headup");
@@ -103,6 +114,13 @@ public class MainController {
         createAlertDialog("Verification Failed", output);
       }
     }
+    try {
+      FileWriter writer = new FileWriter(propfile);
+      LevelEditorProperties.store(writer,"Level Editor Properties");
+      writer.close();
+    }catch(Exception e){
+      System.out.println(e);
+    }
   }
 
   @FXML public void buildLevel() {
@@ -128,27 +146,27 @@ public class MainController {
         for (int j = 0; j < level.getNumberOfVerticalTiles(); j++) {
           ImageView view = new ImageView();
           view.setPickOnBounds(true);
-          view.setOnDragDetected(new EventHandler<MouseEvent>() {
-            public void handle(MouseEvent me) {
-              ImageView targetTile = (ImageView)me.getSource();
-              if (me.isShiftDown()) {
-                targetTile.setImage(selImg);
-                continuousDraw = true;
-              }
-              me.consume();
-            }
-          });
-          view.setOnDragOver(new EventHandler<DragEvent>() {
-            public void handle(DragEvent me) {
-              System.out.println("Here");
-              ImageView targetTile = (ImageView)me.getSource();
-              if (continuousDraw) {
-                System.out.println("Here again");
-                targetTile.setImage(selImg);
-              }
-            }
-          });
-          view.setOnMouseClicked(new EventHandler<MouseEvent>() {
+          /*          view.setOnDragDetected(new EventHandler<MouseEvent>() {
+                      public void handle(MouseEvent me) {
+                        ImageView targetTile = (ImageView)me.getSource();
+                        if (me.isShiftDown()) {
+                          targetTile.setImage(selImg);
+                          continuousDraw = true;
+                        }
+                        me.consume();
+                      }
+                    });
+                    view.setOnDragOver(new EventHandler<DragEvent>() {
+                      public void handle(DragEvent me) {
+                        System.out.println("Here");
+                        ImageView targetTile = (ImageView)me.getSource();
+                        if (continuousDraw) {
+                          System.out.println("Here again");
+                          targetTile.setImage(selImg);
+                        }
+                      }
+                    });
+          */          view.setOnMouseClicked(new EventHandler<MouseEvent>() {
             public void handle(MouseEvent me) {
               ImageView targetTile = (ImageView)me.getSource();
               if (selectedTile == null) {
@@ -286,6 +304,8 @@ public class MainController {
       return;
     }
     Image img = new Image("file:" + selectedFile.getAbsolutePath());
+    Window owner = MainWindow.getScene().getWindow();
+    Stage tmp = null;
     switch (buttonName) {
     case "Background":
       background.setImage(img);
@@ -301,15 +321,18 @@ public class MainController {
       bodyUpRight.setImage(img);
       bodyDownLeft.setImage(img);
       bodyDownRight.setImage(img);
-      SpriteExtractor bodyex = new SpriteExtractor(level, img, 2);
-      bodyex.buildUI().showAndWait();
-      level.setCoordinates(bodyex.coordinates,2);
-      bodyHorizontal.setViewport(new Rectangle2D(bodyex.coordinates.get(0),bodyex.coordinates.get(1),bodyex.coordinates.get(2),bodyex.coordinates.get(3)));
-      bodyVertical.setViewport(new Rectangle2D(bodyex.coordinates.get(4),bodyex.coordinates.get(5),bodyex.coordinates.get(6),bodyex.coordinates.get(7)));
-      bodyUpLeft.setViewport(new Rectangle2D(bodyex.coordinates.get(8),bodyex.coordinates.get(9),bodyex.coordinates.get(10),bodyex.coordinates.get(11)));
-      bodyUpRight.setViewport(new Rectangle2D(bodyex.coordinates.get(12),bodyex.coordinates.get(13),bodyex.coordinates.get(14),bodyex.coordinates.get(15)));
-      bodyDownLeft.setViewport(new Rectangle2D(bodyex.coordinates.get(16),bodyex.coordinates.get(17),bodyex.coordinates.get(18),bodyex.coordinates.get(19)));
-      bodyDownRight.setViewport(new Rectangle2D(bodyex.coordinates.get(20),bodyex.coordinates.get(21),bodyex.coordinates.get(22),bodyex.coordinates.get(23)));
+      SpriteExtractor bodyex = new SpriteExtractor(level, img, 2, LevelEditorProperties.getProperty("body", "0"));
+      tmp = bodyex.buildUI();
+      tmp.initOwner(owner);
+      tmp.showAndWait();
+      level.setCoordinates(bodyex.coordinates, 2);
+      LevelEditorProperties.setProperty("body", (bodyex.coordinates.toString().substring(1, bodyex.coordinates.toString().length() - 1)));
+      bodyHorizontal.setViewport(new Rectangle2D(bodyex.coordinates.get(0), bodyex.coordinates.get(1), bodyex.coordinates.get(2), bodyex.coordinates.get(3)));
+      bodyVertical.setViewport(new Rectangle2D(bodyex.coordinates.get(4), bodyex.coordinates.get(5), bodyex.coordinates.get(6), bodyex.coordinates.get(7)));
+      bodyUpLeft.setViewport(new Rectangle2D(bodyex.coordinates.get(8), bodyex.coordinates.get(9), bodyex.coordinates.get(10), bodyex.coordinates.get(11)));
+      bodyUpRight.setViewport(new Rectangle2D(bodyex.coordinates.get(12), bodyex.coordinates.get(13), bodyex.coordinates.get(14), bodyex.coordinates.get(15)));
+      bodyDownLeft.setViewport(new Rectangle2D(bodyex.coordinates.get(16), bodyex.coordinates.get(17), bodyex.coordinates.get(18), bodyex.coordinates.get(19)));
+      bodyDownRight.setViewport(new Rectangle2D(bodyex.coordinates.get(20), bodyex.coordinates.get(21), bodyex.coordinates.get(22), bodyex.coordinates.get(23)));
 
       break;
     case "Head":
@@ -319,13 +342,16 @@ public class MainController {
       headDown.setImage(img);
       headLeft.setImage(img);
       headRight.setImage(img);
-      SpriteExtractor headex = new SpriteExtractor(level, img, 0);
-      headex.buildUI().showAndWait();
-      level.setCoordinates(headex.coordinates,0);
-      headUp.setViewport(new Rectangle2D(headex.coordinates.get(0),headex.coordinates.get(1),headex.coordinates.get(2),headex.coordinates.get(3)));
-      headDown.setViewport(new Rectangle2D(headex.coordinates.get(4),headex.coordinates.get(5),headex.coordinates.get(6),headex.coordinates.get(7)));
-      headLeft.setViewport(new Rectangle2D(headex.coordinates.get(8),headex.coordinates.get(9),headex.coordinates.get(10),headex.coordinates.get(11)));
-      headRight.setViewport(new Rectangle2D(headex.coordinates.get(12),headex.coordinates.get(13),headex.coordinates.get(14),headex.coordinates.get(15)));
+      SpriteExtractor headex = new SpriteExtractor(level, img, 0, LevelEditorProperties.getProperty("head", "0"));
+      tmp = headex.buildUI();
+      tmp.initOwner(owner);
+      tmp.showAndWait();
+      level.setCoordinates(headex.coordinates, 0);
+      LevelEditorProperties.setProperty("head", (headex.coordinates.toString().substring(1, headex.coordinates.toString().length() - 1)));
+      headUp.setViewport(new Rectangle2D(headex.coordinates.get(0), headex.coordinates.get(1), headex.coordinates.get(2), headex.coordinates.get(3)));
+      headDown.setViewport(new Rectangle2D(headex.coordinates.get(4), headex.coordinates.get(5), headex.coordinates.get(6), headex.coordinates.get(7)));
+      headLeft.setViewport(new Rectangle2D(headex.coordinates.get(8), headex.coordinates.get(9), headex.coordinates.get(10), headex.coordinates.get(11)));
+      headRight.setViewport(new Rectangle2D(headex.coordinates.get(12), headex.coordinates.get(13), headex.coordinates.get(14), headex.coordinates.get(15)));
       break;
     case "Tail":
       level.setTailPath(selectedFile.getAbsolutePath());
@@ -334,30 +360,39 @@ public class MainController {
       tailDown.setImage(img);
       tailLeft.setImage(img);
       tailRight.setImage(img);
-      SpriteExtractor tailex = new SpriteExtractor(level, img, 1);
-      tailex.buildUI().showAndWait();
-      level.setCoordinates(tailex.coordinates,1);
-      tailUp.setViewport(new Rectangle2D(tailex.coordinates.get(0),tailex.coordinates.get(1),tailex.coordinates.get(2),tailex.coordinates.get(3)));
-      tailDown.setViewport(new Rectangle2D(tailex.coordinates.get(4),tailex.coordinates.get(5),tailex.coordinates.get(6),tailex.coordinates.get(7)));
-      tailLeft.setViewport(new Rectangle2D(tailex.coordinates.get(8),tailex.coordinates.get(9),tailex.coordinates.get(10),tailex.coordinates.get(11)));
-      tailRight.setViewport(new Rectangle2D(tailex.coordinates.get(12),tailex.coordinates.get(13),tailex.coordinates.get(14),tailex.coordinates.get(15)));
+      SpriteExtractor tailex = new SpriteExtractor(level, img, 1, LevelEditorProperties.getProperty("tail", "0"));
+      tmp = tailex.buildUI();
+      tmp.initOwner(owner);
+      tmp.showAndWait();
+      level.setCoordinates(tailex.coordinates, 1);
+      LevelEditorProperties.setProperty("tail", (tailex.coordinates.toString().substring(1, tailex.coordinates.toString().length() - 1)));
+      tailUp.setViewport(new Rectangle2D(tailex.coordinates.get(0), tailex.coordinates.get(1), tailex.coordinates.get(2), tailex.coordinates.get(3)));
+      tailDown.setViewport(new Rectangle2D(tailex.coordinates.get(4), tailex.coordinates.get(5), tailex.coordinates.get(6), tailex.coordinates.get(7)));
+      tailLeft.setViewport(new Rectangle2D(tailex.coordinates.get(8), tailex.coordinates.get(9), tailex.coordinates.get(10), tailex.coordinates.get(11)));
+      tailRight.setViewport(new Rectangle2D(tailex.coordinates.get(12), tailex.coordinates.get(13), tailex.coordinates.get(14), tailex.coordinates.get(15)));
       break;
     case "Obstacle":
       level.setObstaclePath(selectedFile.getAbsolutePath());
       obstacle.setImage(img);
-      SpriteExtractor obstex = new SpriteExtractor(level, img, 4);
-      obstex.buildUI().showAndWait();
-      level.setCoordinates(obstex.coordinates,4);
+      SpriteExtractor obstex = new SpriteExtractor(level, img, 4, LevelEditorProperties.getProperty("obstacle", "0"));
+      tmp = obstex.buildUI();
+      tmp.initOwner(owner);
+      tmp.showAndWait();
+      level.setCoordinates(obstex.coordinates, 4);
+      LevelEditorProperties.setProperty("obstacle", (obstex.coordinates.toString().substring(1, obstex.coordinates.toString().length() - 1)));
       obstacleTile.setImage(img);
-      obstacleTile.setViewport(new Rectangle2D(obstex.coordinates.get(0),obstex.coordinates.get(1),obstex.coordinates.get(2),obstex.coordinates.get(3)));
+      obstacleTile.setViewport(new Rectangle2D(obstex.coordinates.get(0), obstex.coordinates.get(1), obstex.coordinates.get(2), obstex.coordinates.get(3)));
       break;
     case "Food":
       level.setFoodPath(selectedFile.getAbsolutePath());
-      SpriteExtractor foodex = new SpriteExtractor(level, img, 3);
-      foodex.buildUI().showAndWait();
-      level.setCoordinates(foodex.coordinates,2);
+      SpriteExtractor foodex = new SpriteExtractor(level, img, 3, LevelEditorProperties.getProperty("food", "0"));
+      tmp = foodex.buildUI();
+      tmp.initOwner(owner);
+      tmp.showAndWait();
+      level.setCoordinates(foodex.coordinates, 2);
+      LevelEditorProperties.setProperty("food", (foodex.coordinates.toString().substring(1, foodex.coordinates.toString().length() - 1)));
       food.setImage(img);
-      food.setViewport(new Rectangle2D(foodex.coordinates.get(0),foodex.coordinates.get(1),foodex.coordinates.get(2),foodex.coordinates.get(3)));
+      food.setViewport(new Rectangle2D(foodex.coordinates.get(0), foodex.coordinates.get(1), foodex.coordinates.get(2), foodex.coordinates.get(3)));
       break;
     }
   }
@@ -379,6 +414,8 @@ public class MainController {
   private static LevelEditor level ;
   private boolean continuousDraw = false;
   private final Image selImg = new Image("file:./Resources/selected.png");
+  private Properties LevelEditorProperties = new Properties();
+  private File propfile = new File("Editor.prop");
 }
 
 class NewLevelDialogController {
@@ -439,7 +476,7 @@ class SpriteExtractor {
     3-food
     4-obstacle
   */
-  SpriteExtractor (LevelEditor level, Image img, int mode) {
+  SpriteExtractor (LevelEditor level, Image img, int mode, String oldValues) {
     this.level = level;
     this.mode = mode;
     this.img = img;
@@ -467,8 +504,15 @@ class SpriteExtractor {
       arrayOfImageView[i].setFitHeight(60);
       arrayOfImageView[i].setFitWidth(60);
     }
+    String []values = null;
+    if (!oldValues.equals("0")) {
+      values = oldValues.split(", ");
+    }
     for (int i = 0; i < arrayOfTextField.length; i++) {
       arrayOfTextField[i] = new TextField();
+      if (!oldValues.equals("0")) {
+        arrayOfTextField[i].setText(values[i]);
+      }
       arrayOfTextField[i].textProperty().addListener(new ChangeListener<String>() {
         public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
           verified = false;
@@ -576,6 +620,7 @@ class SpriteExtractor {
     newStage = new Stage();
     newStage.initStyle(StageStyle.UNDECORATED);
     newStage.setScene(new Scene(base));
+    newStage.initModality(Modality.APPLICATION_MODAL);
     return newStage;
   }
   private boolean verified = false;
