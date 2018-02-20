@@ -47,7 +47,8 @@ public class LevelEditor {
       break;
 
     }
-
+    body.clear();
+    obs.clear();
     while (!(nextCoordinateX == tailTileCoordinate[0] && nextCoordinateY == tailTileCoordinate[1])) {
       body.add(new Point(nextCoordinateX, nextCoordinateY));
       directions.add(direction);
@@ -245,12 +246,46 @@ public class LevelEditor {
     }
     levelDetails.println(");");
     levelDetails.flush();
-    
+    spriteDetails.println("head:");
+    spriteDetails.println("{\n\tpath=\"images/head.png\";");
+    spriteDetails.println("\tup=[" + headCoordinates.get(0) + "," + headCoordinates.get(1) + "," + headCoordinates.get(2) + "," + headCoordinates.get(3) + "];");
+    spriteDetails.println("\tdown=[" + headCoordinates.get(4) + "," + headCoordinates.get(5) + "," + headCoordinates.get(6) + "," + headCoordinates.get(7) + "];");
+    spriteDetails.println("\tleft=[" + headCoordinates.get(8) + "," + headCoordinates.get(9) + "," + headCoordinates.get(10) + "," + headCoordinates.get(11) + "];");
+    spriteDetails.println("\tright=[" + headCoordinates.get(12) + "," + headCoordinates.get(13) + "," + headCoordinates.get(14) + "," + headCoordinates.get(15) + "];");
+    spriteDetails.println("};\n");
+
+    spriteDetails.println("tail:");
+    spriteDetails.println("{\n\tpath=\"images/tail.png\";");
+    spriteDetails.println("\tup=[" + tailCoordinates.get(0) + "," + tailCoordinates.get(1) + "," + tailCoordinates.get(2) + "," + tailCoordinates.get(3) + "];");
+    spriteDetails.println("\tdown=[" + tailCoordinates.get(4) + "," + tailCoordinates.get(5) + "," + tailCoordinates.get(6) + "," + tailCoordinates.get(7) + "];");
+    spriteDetails.println("\tleft=[" + tailCoordinates.get(8) + "," + tailCoordinates.get(9) + "," + tailCoordinates.get(10) + "," + tailCoordinates.get(11) + "];");
+    spriteDetails.println("\tright=[" + tailCoordinates.get(12) + "," + tailCoordinates.get(13) + "," + tailCoordinates.get(14) + "," + tailCoordinates.get(15) + "];");
+    spriteDetails.println("};\n");
+
+    spriteDetails.println("body:");
+    spriteDetails.println("{\n\tpath=\"images/body.png\";");
+    spriteDetails.println("\tvertical=[" + tailCoordinates.get(0) + "," + tailCoordinates.get(1) + "," + tailCoordinates.get(2) + "," + tailCoordinates.get(3) + "];");
+    spriteDetails.println("\thorizontal=[" + tailCoordinates.get(4) + "," + tailCoordinates.get(5) + "," + tailCoordinates.get(6) + "," + tailCoordinates.get(7) +  "];");
+    spriteDetails.println("\tupleft=[" + tailCoordinates.get(8) + "," + tailCoordinates.get(9) + "," + tailCoordinates.get(10) + "," + tailCoordinates.get(11) + "];");
+    spriteDetails.println("\tupright=[" + tailCoordinates.get(12) + "," + tailCoordinates.get(13) + "," + tailCoordinates.get(14) + "," + tailCoordinates.get(15) + "];");
+    spriteDetails.println("\trightup=[" + tailCoordinates.get(16) + "," + tailCoordinates.get(17) + "," + tailCoordinates.get(18) + "," + tailCoordinates.get(19) + "];");
+    spriteDetails.println("\tleftup=[" + tailCoordinates.get(20) + "," + tailCoordinates.get(21) + "," + tailCoordinates.get(22) + "," + tailCoordinates.get(23) + "];");
+    spriteDetails.println("};\n");
+
+    spriteDetails.println("food:");
+    spriteDetails.println("{\n\tpath=\"images/food.png\";");
+    spriteDetails.println("\tobject=[" + foodCoordinates.get(0) + "," + foodCoordinates.get(1) + "," + foodCoordinates.get(2) + "," + foodCoordinates.get(3) + "];");
+    spriteDetails.println("};\n");
+
+    spriteDetails.println("obstacle:");
+    spriteDetails.println("{\n\tpath=\"images/obstacle.png\";");
+    spriteDetails.println("\tobject=[" + obstacleCoordinates.get(0) + "," + obstacleCoordinates.get(1) + "," + obstacleCoordinates.get(2) + "," + obstacleCoordinates.get(3) + "];");
+    spriteDetails.println("};");
+
 
     levelDetails.close();
     spriteDetails.close();
-    body.clear();
-    obs.clear();
+
     return "ok";
   }
 
@@ -322,10 +357,7 @@ public class LevelEditor {
     numberOfVerticalTiles = verticalTiles;
     level = new Sprites[numberOfHorizontalTiles][numberOfVerticalTiles];
   }
-  public void setTextureDimension(int width, int height) {
-    textureWidth = width;
-    textureHeight = height;
-  }
+
   public int getNumberOfHorizontalTiles() {
     return numberOfHorizontalTiles;
   }
@@ -335,12 +367,6 @@ public class LevelEditor {
     return numberOfVerticalTiles;
   }
 
-  public int getTextureWidth() {
-    return textureWidth;
-  }
-  public int getTextureHeight() {
-    return textureHeight;
-  }
   public void setHeadTileCoordinate(int x, int y) {
     headTileCoordinate[0] = x;
     headTileCoordinate[1] = y;
@@ -420,6 +446,28 @@ public class LevelEditor {
     }
     private int x, y;
   }
+  public void setCoordinates(ArrayList<Integer> coordinates, int mode) {
+    ArrayList<Integer> reference = null;
+    switch (mode) {
+    case 0:
+      reference = headCoordinates;
+      break;
+    case 1:
+      reference = tailCoordinates;
+      break;
+    case 2:
+      reference = bodyCoordinates;
+      break;
+    case 3:
+      reference = foodCoordinates;
+      break;
+    case 4:
+      reference = obstacleCoordinates;
+    }
+    for (Integer x : coordinates) {
+      reference.add(new Integer(x));
+    }
+  }
   private boolean isVerified = false;
   private int headTileCoordinate[] = new int[2];
   private int tailTileCoordinate[] = new int[2];
@@ -427,12 +475,16 @@ public class LevelEditor {
   private boolean isTailPlaced = false;
   private int numberOfHorizontalTiles = 16;
   private int numberOfVerticalTiles = 9;
-  private int textureWidth = 256;
-  private int textureHeight = 256;
+
   private Sprites level[][];
   private String gameFolderPath = null, backgroundPath, bodyPath, headPath, tailPath, obstaclePath, foodPath;
   private ArrayList<Point> body = new ArrayList<Point>();
   private ArrayList<Point> obs = new ArrayList<Point>();
   private ArrayList<Integer> directions = new ArrayList<Integer>();
   private PrintWriter spriteDetails, levelDetails;
+  private ArrayList<Integer> headCoordinates = new ArrayList<Integer>();
+  private ArrayList<Integer> tailCoordinates = new ArrayList<Integer>();
+  private ArrayList<Integer> bodyCoordinates = new ArrayList<Integer>();
+  private ArrayList<Integer> foodCoordinates = new ArrayList<Integer>();
+  private ArrayList<Integer> obstacleCoordinates = new ArrayList<Integer>();
 }

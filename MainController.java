@@ -1,4 +1,5 @@
 package snake.leveleditor.ui.controller;
+import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import snake.leveleditor.utils.LevelEditor;
@@ -36,6 +37,14 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.DragEvent;
+import java.util.ArrayList;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.control.Label;
+import javafx.geometry.Pos;
+import javafx.scene.text.Font;
+import javafx.beans.value.ObservableValue;
+import javafx.stage.StageStyle;
 
 
 public class MainController {
@@ -114,8 +123,6 @@ public class MainController {
       stage.initOwner(newLevelScene.getWindow());
       stage.setScene(newLevelScene);
       stage.showAndWait();
-      textureWidth = level.getTextureWidth();
-      textureHeight = level.getTextureHeight();
       canvas.getChildren().removeAll();
       for (int i = 0; i < level.getNumberOfHorizontalTiles(); i++) {
         for (int j = 0; j < level.getNumberOfVerticalTiles(); j++) {
@@ -289,17 +296,20 @@ public class MainController {
       level.setBodyPath(selectedFile.getAbsolutePath());
       body.setImage(img);
       bodyHorizontal.setImage(img);
-      bodyHorizontal.setViewport(new Rectangle2D(0, 0, textureWidth, textureHeight));
       bodyVertical.setImage(img);
-      bodyVertical.setViewport(new Rectangle2D(256, 0, textureWidth, textureHeight));
       bodyUpLeft.setImage(img);
-      bodyUpLeft.setViewport(new Rectangle2D(0, 256, textureWidth, textureHeight));
       bodyUpRight.setImage(img);
-      bodyUpRight.setViewport(new Rectangle2D(256, 256, textureWidth, textureHeight));
       bodyDownLeft.setImage(img);
-      bodyDownLeft.setViewport(new Rectangle2D(0, 512, textureWidth, textureHeight));
       bodyDownRight.setImage(img);
-      bodyDownRight.setViewport(new Rectangle2D(256, 512, textureWidth, textureHeight));
+      SpriteExtractor bodyex = new SpriteExtractor(level, img, 2);
+      bodyex.buildUI().showAndWait();
+      level.setCoordinates(bodyex.coordinates,2);
+      bodyHorizontal.setViewport(new Rectangle2D(bodyex.coordinates.get(0),bodyex.coordinates.get(1),bodyex.coordinates.get(2),bodyex.coordinates.get(3)));
+      bodyVertical.setViewport(new Rectangle2D(bodyex.coordinates.get(4),bodyex.coordinates.get(5),bodyex.coordinates.get(6),bodyex.coordinates.get(7)));
+      bodyUpLeft.setViewport(new Rectangle2D(bodyex.coordinates.get(8),bodyex.coordinates.get(9),bodyex.coordinates.get(10),bodyex.coordinates.get(11)));
+      bodyUpRight.setViewport(new Rectangle2D(bodyex.coordinates.get(12),bodyex.coordinates.get(13),bodyex.coordinates.get(14),bodyex.coordinates.get(15)));
+      bodyDownLeft.setViewport(new Rectangle2D(bodyex.coordinates.get(16),bodyex.coordinates.get(17),bodyex.coordinates.get(18),bodyex.coordinates.get(19)));
+      bodyDownRight.setViewport(new Rectangle2D(bodyex.coordinates.get(20),bodyex.coordinates.get(21),bodyex.coordinates.get(22),bodyex.coordinates.get(23)));
 
       break;
     case "Head":
@@ -309,10 +319,13 @@ public class MainController {
       headDown.setImage(img);
       headLeft.setImage(img);
       headRight.setImage(img);
-      headUp.setViewport(new Rectangle2D(0, 0, textureWidth, textureHeight));
-      headDown.setViewport(new Rectangle2D(256, 256, textureWidth, textureHeight));
-      headRight.setViewport(new Rectangle2D(256, 0, textureWidth, textureHeight));
-      headLeft.setViewport(new Rectangle2D(0, 256, textureWidth, textureHeight));
+      SpriteExtractor headex = new SpriteExtractor(level, img, 0);
+      headex.buildUI().showAndWait();
+      level.setCoordinates(headex.coordinates,0);
+      headUp.setViewport(new Rectangle2D(headex.coordinates.get(0),headex.coordinates.get(1),headex.coordinates.get(2),headex.coordinates.get(3)));
+      headDown.setViewport(new Rectangle2D(headex.coordinates.get(4),headex.coordinates.get(5),headex.coordinates.get(6),headex.coordinates.get(7)));
+      headLeft.setViewport(new Rectangle2D(headex.coordinates.get(8),headex.coordinates.get(9),headex.coordinates.get(10),headex.coordinates.get(11)));
+      headRight.setViewport(new Rectangle2D(headex.coordinates.get(12),headex.coordinates.get(13),headex.coordinates.get(14),headex.coordinates.get(15)));
       break;
     case "Tail":
       level.setTailPath(selectedFile.getAbsolutePath());
@@ -321,19 +334,30 @@ public class MainController {
       tailDown.setImage(img);
       tailLeft.setImage(img);
       tailRight.setImage(img);
-      tailUp.setViewport(new Rectangle2D(0, 0, textureWidth, textureHeight));
-      tailDown.setViewport(new Rectangle2D(256, 256, textureWidth, textureHeight));
-      tailLeft.setViewport(new Rectangle2D(256, 0, textureWidth, textureHeight));
-      tailRight.setViewport(new Rectangle2D(0, 256, textureWidth, textureHeight));
+      SpriteExtractor tailex = new SpriteExtractor(level, img, 1);
+      tailex.buildUI().showAndWait();
+      level.setCoordinates(tailex.coordinates,1);
+      tailUp.setViewport(new Rectangle2D(tailex.coordinates.get(0),tailex.coordinates.get(1),tailex.coordinates.get(2),tailex.coordinates.get(3)));
+      tailDown.setViewport(new Rectangle2D(tailex.coordinates.get(4),tailex.coordinates.get(5),tailex.coordinates.get(6),tailex.coordinates.get(7)));
+      tailLeft.setViewport(new Rectangle2D(tailex.coordinates.get(8),tailex.coordinates.get(9),tailex.coordinates.get(10),tailex.coordinates.get(11)));
+      tailRight.setViewport(new Rectangle2D(tailex.coordinates.get(12),tailex.coordinates.get(13),tailex.coordinates.get(14),tailex.coordinates.get(15)));
       break;
     case "Obstacle":
       level.setObstaclePath(selectedFile.getAbsolutePath());
       obstacle.setImage(img);
+      SpriteExtractor obstex = new SpriteExtractor(level, img, 4);
+      obstex.buildUI().showAndWait();
+      level.setCoordinates(obstex.coordinates,4);
       obstacleTile.setImage(img);
+      obstacleTile.setViewport(new Rectangle2D(obstex.coordinates.get(0),obstex.coordinates.get(1),obstex.coordinates.get(2),obstex.coordinates.get(3)));
       break;
     case "Food":
       level.setFoodPath(selectedFile.getAbsolutePath());
+      SpriteExtractor foodex = new SpriteExtractor(level, img, 3);
+      foodex.buildUI().showAndWait();
+      level.setCoordinates(foodex.coordinates,2);
       food.setImage(img);
+      food.setViewport(new Rectangle2D(foodex.coordinates.get(0),foodex.coordinates.get(1),foodex.coordinates.get(2),foodex.coordinates.get(3)));
       break;
     }
   }
@@ -353,7 +377,6 @@ public class MainController {
   private GridPane canvas;
   private NewLevelDialogController controller;
   private static LevelEditor level ;
-  private int textureWidth, textureHeight;
   private boolean continuousDraw = false;
   private final Image selImg = new Image("file:./Resources/selected.png");
 }
@@ -371,7 +394,6 @@ class NewLevelDialogController {
         return;
       }
       level.setTiles(Integer.parseInt(horizontalTiles.getText()), Integer.parseInt(verticalTiles.getText()));
-      level.setTextureDimension(Integer.parseInt(textureWidth.getText()), Integer.parseInt(textureHeight.getText()));
       ((Stage)newLevelDialog.getScene().getWindow()).close();
 
     } catch (NumberFormatException e) {
@@ -402,8 +424,167 @@ class NewLevelDialogController {
     alert.showAndWait();
   }
 
-  @FXML TextField horizontalTiles, verticalTiles, textureWidth, textureHeight;
+  @FXML TextField horizontalTiles, verticalTiles;
   @FXML VBox newLevelDialog;
 
   private LevelEditor level;
+}
+
+class SpriteExtractor {
+  /*
+    mode:
+    0-head
+    1-tail
+    2-body
+    3-food
+    4-obstacle
+  */
+  SpriteExtractor (LevelEditor level, Image img, int mode) {
+    this.level = level;
+    this.mode = mode;
+    this.img = img;
+    switch (mode) {
+    case 0:
+    case 1:
+      arrayOfTextField = new TextField[16];
+      arrayOfImageView = new ImageView[4];
+      break;
+    case 2:
+      arrayOfTextField = new TextField[24];
+      arrayOfImageView = new ImageView[6];
+      break;
+    case 3:
+      arrayOfTextField = new TextField[4];
+      arrayOfImageView = new ImageView[1];
+      break;
+    case 4:
+      arrayOfTextField = new TextField[4];
+      arrayOfImageView = new ImageView[1];
+      break;
+    }
+    for (int i = 0; i < arrayOfImageView.length; i++) {
+      arrayOfImageView[i] = new ImageView(img);
+      arrayOfImageView[i].setFitHeight(60);
+      arrayOfImageView[i].setFitWidth(60);
+    }
+    for (int i = 0; i < arrayOfTextField.length; i++) {
+      arrayOfTextField[i] = new TextField();
+      arrayOfTextField[i].textProperty().addListener(new ChangeListener<String>() {
+        public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+          verified = false;
+        }
+      });
+    }
+  }
+
+  public Stage buildUI() {
+    base = new VBox();
+    base.setSpacing(10);
+    base.setAlignment(Pos.BASELINE_CENTER);
+    switch (mode) {
+    case 0:
+    case 1:
+      Label top = new Label("Up", arrayOfImageView[0]);
+      Label down = new Label("Down", arrayOfImageView[1]);
+      Label left = new Label("Left", arrayOfImageView[2]);
+      Label right = new Label("Right", arrayOfImageView[3]);
+      top.setFont(Font.font("Monospaced", 12));
+      down.setFont(Font.font("Monospaced", 12));
+      left.setFont(Font.font("Monospaced", 12));
+      right.setFont(Font.font("Monospaced", 12));
+      top.prefWidthProperty().bind(right.widthProperty());
+      down.prefWidthProperty().bind(right.widthProperty());
+      left.prefWidthProperty().bind(right.widthProperty());
+      base.getChildren().add(new HBox(10, top, arrayOfTextField[0], arrayOfTextField[1], arrayOfTextField[2], arrayOfTextField[3]));
+      base.getChildren().add(new HBox(10, down, arrayOfTextField[4], arrayOfTextField[5], arrayOfTextField[6], arrayOfTextField[7]));
+      base.getChildren().add(new HBox(10, left, arrayOfTextField[8], arrayOfTextField[9], arrayOfTextField[10], arrayOfTextField[11]));
+      base.getChildren().add(new HBox(10, right, arrayOfTextField[12], arrayOfTextField[13], arrayOfTextField[14], arrayOfTextField[15]));
+      break;
+    case 2:
+      Label horz = new Label("Horizontal", arrayOfImageView[0]);
+      Label vert = new Label("Vertical", arrayOfImageView[1]);
+      Label upleft = new Label("upleft", arrayOfImageView[2]);
+      Label upright = new Label("upright", arrayOfImageView[3]);
+      Label downleft = new Label("downleft", arrayOfImageView[4]);
+      Label downright = new Label("downright", arrayOfImageView[5]);
+      horz.setFont(Font.font("Monospaced", 12));
+      vert.setFont(Font.font("Monospaced", 12));
+      upleft.setFont(Font.font("Monospaced", 12));
+      upright.setFont(Font.font("Monospaced", 12));
+      downleft.setFont(Font.font("Monospaced", 12));
+      downright.setFont(Font.font("Monospaced", 12));
+      vert.prefWidthProperty().bind(horz.widthProperty());
+      upleft.prefWidthProperty().bind(horz.widthProperty());
+      upright.prefWidthProperty().bind(horz.widthProperty());
+      downleft.prefWidthProperty().bind(horz.widthProperty());
+      downright.prefWidthProperty().bind(horz.widthProperty());
+      base.getChildren().add(new HBox(10, horz, arrayOfTextField[0], arrayOfTextField[1], arrayOfTextField[2], arrayOfTextField[3]));
+      base.getChildren().add(new HBox(10, vert, arrayOfTextField[4], arrayOfTextField[5], arrayOfTextField[6], arrayOfTextField[7]));
+      base.getChildren().add(new HBox(10, upleft, arrayOfTextField[8], arrayOfTextField[9], arrayOfTextField[10], arrayOfTextField[11]));
+      base.getChildren().add(new HBox(10, upright, arrayOfTextField[12], arrayOfTextField[13], arrayOfTextField[14], arrayOfTextField[15]));
+      base.getChildren().add(new HBox(10, downleft, arrayOfTextField[16], arrayOfTextField[17], arrayOfTextField[18], arrayOfTextField[19]));
+      base.getChildren().add(new HBox(10, downright, arrayOfTextField[20], arrayOfTextField[21], arrayOfTextField[22], arrayOfTextField[23]));
+      break;
+    case 3:
+      Label food = new Label("Food", arrayOfImageView[0]);
+      food.setFont(Font.font("Monospaced", 12));
+      base.getChildren().add(new HBox(10, food, arrayOfTextField[0], arrayOfTextField[1], arrayOfTextField[2], arrayOfTextField[3]));
+      break;
+    case 4:
+      Label obstacle = new Label("obstacle", arrayOfImageView[0]);
+      obstacle.setFont(Font.font("Monospaced", 12));
+      base.getChildren().add(new HBox(10, obstacle, arrayOfTextField[0], arrayOfTextField[1], arrayOfTextField[2], arrayOfTextField[3]));
+      break;
+    }
+    Button ok = new Button("Ok");
+    Button check = new Button("check");
+    check.setOnAction(new EventHandler<ActionEvent>() {
+      public void handle(ActionEvent ae) {
+        int upperLimit = 0;
+        switch (mode) {
+        case 0:
+        case 1:
+          upperLimit = 4;
+          break;
+        case 2:
+          upperLimit = 6;
+          break;
+        default:
+          upperLimit = 1;
+        }
+        try {
+          for (int i = 0; i < upperLimit; i++) {
+            arrayOfImageView[i].setViewport(new Rectangle2D(Integer.parseInt(arrayOfTextField[i * 4].getText()), Integer.parseInt(arrayOfTextField[i * 4 + 1].getText()), Integer.parseInt(arrayOfTextField[i * 4 + 2].getText()), Integer.parseInt(arrayOfTextField[i * 4 + 3].getText())));
+          }
+          verified = true;
+        } catch (Exception e) {
+
+        }
+      }
+    });
+    ok.setOnAction(new EventHandler<ActionEvent>() {
+      public void handle(ActionEvent ae) {
+        if (verified) {
+          for (TextField t : arrayOfTextField) {
+            coordinates.add(Integer.parseInt(t.getText()));
+          }
+          newStage.close();
+        }
+      }
+    });
+    base.getChildren().add(new HBox(10, check, ok));
+    newStage = new Stage();
+    newStage.initStyle(StageStyle.UNDECORATED);
+    newStage.setScene(new Scene(base));
+    return newStage;
+  }
+  private boolean verified = false;
+  private ImageView arrayOfImageView[];
+  private TextField arrayOfTextField[];
+  private VBox base;
+  private Image img;
+  public ArrayList<Integer> coordinates = new ArrayList<Integer>();
+  private LevelEditor level;
+  private int mode;
+  private Stage newStage;
 }

@@ -51,32 +51,6 @@
             <Insets left="20.0" right="20.0" />
          </padding>
       </HBox>
-      <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
-         <children>
-            <Label text="Texture Width  " />
-            <TextField fx:id="textureWidth" text="256" HBox.hgrow="ALWAYS">
-               <HBox.margin>
-                  <Insets left="20.0" />
-               </HBox.margin>
-            </TextField>
-         </children>
-         <padding>
-            <Insets left="20.0" right="20.0" />
-         </padding>
-      </HBox>
-      <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
-         <children>
-            <Label text="Texture Height" />
-            <TextField fx:id="textureHeight" text="256" HBox.hgrow="ALWAYS">
-               <HBox.margin>
-                  <Insets left="20.0" />
-               </HBox.margin>
-            </TextField>
-         </children>
-         <padding>
-            <Insets left="20.0" right="20.0" />
-         </padding>
-      </HBox>
       <Button mnemonicParsing="false" onAction="#initializeLevelEditor" text="Ok" />
    </children>
    <padding>
