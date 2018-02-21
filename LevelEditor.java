@@ -49,6 +49,7 @@ public class LevelEditor {
     }
     body.clear();
     obs.clear();
+    directions.clear();
     while (!(nextCoordinateX == tailTileCoordinate[0] && nextCoordinateY == tailTileCoordinate[1])) {
       body.add(new Point(nextCoordinateX, nextCoordinateY));
       directions.add(direction);
@@ -146,7 +147,6 @@ public class LevelEditor {
       break;
     }
     directions.add(direction);
-
     for (int i = 0; i < numberOfHorizontalTiles; i++) {
       for (int j = 0; j <  numberOfVerticalTiles; j++) {
         if (level[i][j] == Sprites.OBSTACLE) {
@@ -155,7 +155,7 @@ public class LevelEditor {
       }
     }
 
-    isVerified = true;
+
     return "ok";
 
   }
@@ -170,7 +170,7 @@ public class LevelEditor {
     case HEAD_DOWN:
       return "\"hd\"";
     case HEAD_LEFT:
-      return "\"hd\"";
+      return "\"hl\"";
     case HEAD_RIGHT:
       return "\"hr\"";
     case TAIL_UP:
@@ -210,12 +210,6 @@ public class LevelEditor {
     return "";
   }
   public String buildLevel() {
-    if (!isVerified) {
-      String output = verify();
-      if (!output.equals("ok")) {
-        return output;
-      }
-    }
     try {
       spriteDetails = new PrintWriter(new FileWriter(gameFolderPath + "/SpriteDetails.cfg"));
       levelDetails = new PrintWriter(new FileWriter(gameFolderPath + "/LevelDetails.cfg"));
@@ -264,12 +258,12 @@ public class LevelEditor {
 
     spriteDetails.println("body:");
     spriteDetails.println("{\n\tpath=\"images/body.png\";");
-    spriteDetails.println("\tvertical=[" + tailCoordinates.get(0) + "," + tailCoordinates.get(1) + "," + tailCoordinates.get(2) + "," + tailCoordinates.get(3) + "];");
-    spriteDetails.println("\thorizontal=[" + tailCoordinates.get(4) + "," + tailCoordinates.get(5) + "," + tailCoordinates.get(6) + "," + tailCoordinates.get(7) +  "];");
-    spriteDetails.println("\tupleft=[" + tailCoordinates.get(8) + "," + tailCoordinates.get(9) + "," + tailCoordinates.get(10) + "," + tailCoordinates.get(11) + "];");
-    spriteDetails.println("\tupright=[" + tailCoordinates.get(12) + "," + tailCoordinates.get(13) + "," + tailCoordinates.get(14) + "," + tailCoordinates.get(15) + "];");
-    spriteDetails.println("\trightup=[" + tailCoordinates.get(16) + "," + tailCoordinates.get(17) + "," + tailCoordinates.get(18) + "," + tailCoordinates.get(19) + "];");
-    spriteDetails.println("\tleftup=[" + tailCoordinates.get(20) + "," + tailCoordinates.get(21) + "," + tailCoordinates.get(22) + "," + tailCoordinates.get(23) + "];");
+    spriteDetails.println("\thorizontal=[" + bodyCoordinates.get(0) + "," + bodyCoordinates.get(1) + "," + bodyCoordinates.get(2) + "," + bodyCoordinates.get(3) + "];");
+    spriteDetails.println("\tvertical=[" + bodyCoordinates.get(4) + "," + bodyCoordinates.get(5) + "," + bodyCoordinates.get(6) + "," + bodyCoordinates.get(7) +  "];");
+    spriteDetails.println("\tupleft=[" + bodyCoordinates.get(8) + "," + bodyCoordinates.get(9) + "," + bodyCoordinates.get(10) + "," + bodyCoordinates.get(11) + "];");
+    spriteDetails.println("\tupright=[" + bodyCoordinates.get(12) + "," + bodyCoordinates.get(13) + "," + bodyCoordinates.get(14) + "," + bodyCoordinates.get(15) + "];");
+    spriteDetails.println("\trightup=[" + bodyCoordinates.get(16) + "," + bodyCoordinates.get(17) + "," + bodyCoordinates.get(18) + "," + bodyCoordinates.get(19) + "];");
+    spriteDetails.println("\tleftup=[" + bodyCoordinates.get(20) + "," + bodyCoordinates.get(21) + "," + bodyCoordinates.get(22) + "," + bodyCoordinates.get(23) + "];");
     spriteDetails.println("};\n");
 
     spriteDetails.println("food:");
@@ -467,8 +461,9 @@ public class LevelEditor {
     for (Integer x : coordinates) {
       reference.add(new Integer(x));
     }
+
   }
-  private boolean isVerified = false;
+
   private int headTileCoordinate[] = new int[2];
   private int tailTileCoordinate[] = new int[2];
   private boolean isHeadPlaced = false;

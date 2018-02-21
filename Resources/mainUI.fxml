@@ -24,7 +24,7 @@
             <items>
               <MenuItem mnemonicParsing="false" onAction="#createNewLevel" text="New" />
                   <MenuItem mnemonicParsing="false" onAction="#verifyLevel" text="Verify" />
-                  <MenuItem mnemonicParsing="false" onAction="#buildLevel" text="Build" />
+                  <MenuItem fx:id="buildMI" disable="true" mnemonicParsing="false" onAction="#buildLevel" text="Build" />
             </items>
           </Menu>
         </menus>

@@ -50,6 +50,7 @@ import java.util.Properties;
 import java.io.FileReader;
 import java.io.File;
 import java.io.FileWriter;
+import javafx.scene.control.MenuItem;
 
 
 public class MainController {
@@ -93,6 +94,7 @@ public class MainController {
     String output = level.verify();
     if (output.equals("ok")) {
       createAlertDialog("Verification", "Successful");
+      buildMI.setDisable(false);
     } else {
       String debug[] = output.split(" ");
 
@@ -116,9 +118,9 @@ public class MainController {
     }
     try {
       FileWriter writer = new FileWriter(propfile);
-      LevelEditorProperties.store(writer,"Level Editor Properties");
+      LevelEditorProperties.store(writer, "Level Editor Properties");
       writer.close();
-    }catch(Exception e){
+    } catch (Exception e) {
       System.out.println(e);
     }
   }
@@ -146,130 +148,125 @@ public class MainController {
         for (int j = 0; j < level.getNumberOfVerticalTiles(); j++) {
           ImageView view = new ImageView();
           view.setPickOnBounds(true);
-          /*          view.setOnDragDetected(new EventHandler<MouseEvent>() {
-                      public void handle(MouseEvent me) {
-                        ImageView targetTile = (ImageView)me.getSource();
-                        if (me.isShiftDown()) {
-                          targetTile.setImage(selImg);
-                          continuousDraw = true;
-                        }
-                        me.consume();
-                      }
-                    });
-                    view.setOnDragOver(new EventHandler<DragEvent>() {
-                      public void handle(DragEvent me) {
-                        System.out.println("Here");
-                        ImageView targetTile = (ImageView)me.getSource();
-                        if (continuousDraw) {
-                          System.out.println("Here again");
-                          targetTile.setImage(selImg);
-                        }
-                      }
-                    });
-          */          view.setOnMouseClicked(new EventHandler<MouseEvent>() {
+          view.setOnMouseEntered(new EventHandler<MouseEvent>() {
             public void handle(MouseEvent me) {
+              if (!enableEvents)
+                return;
+
+              ImageView targetTile = (ImageView)me.getSource();
+              if (selectedTile == obstacleTile) {
+                if(me.isShiftDown()){
+                  addTile(targetTile,canvas.getColumnIndex(targetTile),canvas.getRowIndex(targetTile),obstacleTile);
+                }
+              } else {
+                int xTarget = 0;
+                int yTarget = 0;
+                int xPrevTile = 0;
+                int yPrevTile = 0;
+                if (me.isShiftDown()) {
+                  buildMI.setDisable(true);
+                  if (!continuousDraw) {
+                    if (level.isHeadPlaced() || level.isTailPlaced()) {
+                      return;
+                    }
+                    lastDraggedTile = targetTile;
+                    continuousDraw = true;
+                  } else {
+                    xTarget = canvas.getColumnIndex(targetTile);
+                    yTarget = canvas.getRowIndex(targetTile);
+                    xPrevTile = canvas.getColumnIndex(lastDraggedTile);
+                    yPrevTile = canvas.getRowIndex(lastDraggedTile);
+                    if (!level.isHeadPlaced()) {
+                      if (yTarget - yPrevTile == 1) {
+                        addTile(lastDraggedTile, xPrevTile, yPrevTile, headUp);
+                      } else if (yTarget - yPrevTile == -1) {
+                        addTile(lastDraggedTile, xPrevTile, yPrevTile, headDown);
+                      } else if (xTarget - xPrevTile == 1) {
+                        addTile(lastDraggedTile, xPrevTile, yPrevTile, headLeft);
+                      } else if (xTarget - xPrevTile == -1) {
+                        addTile(lastDraggedTile, xPrevTile, yPrevTile, headRight);
+                      }
+                    } else {
+                      if (yTarget - yPrevTile == 1) {
+                        if (xPrevDiff == 1)
+                          addTile(lastDraggedTile, xPrevTile, yPrevTile, bodyUpLeft);
+                        else if (xPrevDiff == -1)
+                          addTile(lastDraggedTile, xPrevTile, yPrevTile, bodyUpRight);
+                        else
+                          addTile(lastDraggedTile, xPrevTile, yPrevTile, bodyVertical);
+                      } else if (yTarget - yPrevTile == -1) {
+                        if (xPrevDiff == 1)
+                          addTile(lastDraggedTile, xPrevTile, yPrevTile, bodyDownLeft);
+                        else if (xPrevDiff == -1)
+                          addTile(lastDraggedTile, xPrevTile, yPrevTile, bodyDownRight);
+                        else
+                          addTile(lastDraggedTile, xPrevTile, yPrevTile, bodyVertical);
+
+                      } else if (xTarget - xPrevTile == -1) {
+                        if (yPrevDiff == 1)
+                          addTile(lastDraggedTile, xPrevTile, yPrevTile, bodyDownLeft);
+                        else if (yPrevDiff == -1)
+                          addTile(lastDraggedTile, xPrevTile, yPrevTile, bodyUpLeft);
+                        else
+                          addTile(lastDraggedTile, xPrevTile, yPrevTile, bodyHorizontal);
+                      } else if (xTarget - xPrevTile == 1) {
+                        if (yPrevDiff == 1)
+                          addTile(lastDraggedTile, xPrevTile, yPrevTile, bodyDownRight);
+                        else if (yPrevDiff == -1)
+                          addTile(lastDraggedTile, xPrevTile, yPrevTile, bodyUpRight);
+                        else
+                          addTile(lastDraggedTile, xPrevTile, yPrevTile, bodyHorizontal);
+                      }
+                    }
+                    xPrevDiff = xTarget - xPrevTile;
+                    yPrevDiff = yTarget - yPrevTile;
+                    lastDraggedTile = targetTile;
+                  }
+                } else {
+                  if (continuousDraw) {
+                    xTarget = canvas.getColumnIndex(targetTile);
+                    yTarget = canvas.getRowIndex(targetTile);
+                    xPrevTile = canvas.getColumnIndex(lastDraggedTile);
+                    yPrevTile = canvas.getRowIndex(lastDraggedTile);
+                    if (yTarget - yPrevTile == 1) {
+                      addTile(lastDraggedTile, xPrevTile, yPrevTile, tailUp);
+                    } else if (yTarget - yPrevTile == -1) {
+                      addTile(lastDraggedTile, xPrevTile, yPrevTile, tailDown);
+                    } else if (xTarget - xPrevTile == 1) {
+                      addTile(lastDraggedTile, xPrevTile, yPrevTile, tailLeft);
+                    } else if (xTarget - xPrevTile == -1) {
+                      addTile(lastDraggedTile, xPrevTile, yPrevTile, tailRight);
+                    }
+                    continuousDraw = false;
+                  }
+                }
+              }
+            }
+          });
+
+          view.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            public void handle(MouseEvent me) {
+              if (!enableEvents && me.isShiftDown()) {
+                return;
+              }
               ImageView targetTile = (ImageView)me.getSource();
               if (selectedTile == null) {
                 return;
               }
+              buildMI.setDisable(true);
               targetTile.setStyle("");
-              String substr = selectedTile.getId().substring(0, 4);
               int yCoordinate = canvas.getRowIndex(targetTile);
               int xCoordinate = canvas.getColumnIndex(targetTile);
               if (me.getButton() == MouseButton.PRIMARY) {
-                targetTile.setImage(selectedTile.getImage());
-                targetTile.setViewport(selectedTile.getViewport());
-                if (substr.equals("head")) {
-                  if (level.isHeadPlaced()) {
-                    if ( headTile == targetTile)
-                      return;
-                    headTile.setImage(null);
-                    level.removeTile(level.getHeadTileCoordinateX(), level.getHeadTileCoordinateY());
-                  }
-                  level.setHeadTileCoordinate(xCoordinate, yCoordinate);
-                  level.setIsHeadPlaced(true);
-                  headTile = targetTile;
-                  switch (selectedTile.getId().substring(4)) {
-                  case "up":
-                    level.setTile(xCoordinate, yCoordinate, LevelEditor.Sprites.HEAD_UP);
-                    break;
-                  case "down":
-                    level.setTile(xCoordinate, yCoordinate, LevelEditor.Sprites.HEAD_DOWN);
-                    break;
-                  case "left":
-                    level.setTile(xCoordinate, yCoordinate, LevelEditor.Sprites.HEAD_LEFT);
-                    break;
-                  case "right":
-                    level.setTile(xCoordinate, yCoordinate, LevelEditor.Sprites.HEAD_RIGHT);
-                    break;
-                  }
-                } else if (substr.equals("tail")) {
-                  if (level.isTailPlaced() && tailTile != targetTile) {
-                    if (tailTile == targetTile)
-                      return;
-                    tailTile.setImage(null);
-                    level.removeTile(level.getTailTileCoordinateX(), level.getTailTileCoordinateY());
-                  }
-                  level.setTailTileCoordinate(xCoordinate, yCoordinate);
-                  level.setIsTailPlaced(true);
-                  tailTile = targetTile;
-                  switch (selectedTile.getId().substring(4)) {
-                  case "up":
-                    level.setTile(xCoordinate, yCoordinate, LevelEditor.Sprites.TAIL_UP);
-                    break;
-                  case "down":
-                    level.setTile(xCoordinate, yCoordinate, LevelEditor.Sprites.TAIL_DOWN);
-                    break;
-                  case "left":
-                    level.setTile(xCoordinate, yCoordinate, LevelEditor.Sprites.TAIL_LEFT);
-                    break;
-                  case "right":
-                    level.setTile(xCoordinate, yCoordinate, LevelEditor.Sprites.TAIL_RIGHT);
-                    break;
-                  }
-                } else if (substr.equals("body")) {
-                  if (headTile == targetTile) {
-                    level.setHeadTileCoordinate(-1, -1);
-                    level.setIsHeadPlaced(false);
-                    headTile = null;
-                  }
-                  if (tailTile == targetTile) {
-                    level.setTailTileCoordinate(-1, -1);
-                    level.setIsTailPlaced(false);
-                    tailTile = null;
-                  }
-                  switch (selectedTile.getId().substring(4)) {
-                  case "horz":
-                    level.setTile(xCoordinate, yCoordinate, LevelEditor.Sprites.BODY_HORIZONTAL);
-                    break;
-                  case "vert":
-                    level.setTile(xCoordinate, yCoordinate, LevelEditor.Sprites.BODY_VERTICAL);
-                    break;
-                  case "ul":
-                    level.setTile(xCoordinate, yCoordinate, LevelEditor.Sprites.BODY_UPLEFT);
-                    break;
-                  case "ur":
-                    level.setTile(xCoordinate, yCoordinate, LevelEditor.Sprites.BODY_UPRIGHT);
-                    break;
-                  case "ru":
-                    level.setTile(xCoordinate, yCoordinate, LevelEditor.Sprites.BODY_RIGHTUP);
-                    break;
-                  case "lu":
-                    level.setTile(xCoordinate, yCoordinate, LevelEditor.Sprites.BODY_LEFTUP);
-                    break;
-                  }
-
-                } else if (substr.equals("obst")) {
-                  level.setTile(xCoordinate, yCoordinate, LevelEditor.Sprites.OBSTACLE);
-                }
+                addTile(targetTile, xCoordinate, yCoordinate, selectedTile);
               } else if (me.getButton() == MouseButton.SECONDARY) {
                 targetTile.setImage(null);
                 level.removeTile(xCoordinate, yCoordinate);
-                if (substr.equals("head")) {
-                  level.setIsHeadPlaced(false);
+                if (targetTile == headTile) {
                   headTile = null;
+                  level.setIsHeadPlaced(false);
                 }
-                if (substr.equals("tail")) {
+                if (targetTile == tailTile) {
                   level.setIsTailPlaced(false);
                   tailTile = null;
                 }
@@ -294,6 +291,95 @@ public class MainController {
 
   }
 
+  private void addTile(ImageView targetTile, int xCoordinate, int yCoordinate, ImageView selectedTile) {
+    targetTile.setImage(selectedTile.getImage());
+    targetTile.setViewport(selectedTile.getViewport());
+    String tileId = selectedTile.getId().substring(0, 4);
+    String subId = selectedTile.getId().substring(4);
+    if (tileId.equals("head")) {
+      if (level.isHeadPlaced()) {
+        if ( headTile == targetTile)
+          return;
+        headTile.setImage(null);
+        level.removeTile(level.getHeadTileCoordinateX(), level.getHeadTileCoordinateY());
+      }
+      level.setHeadTileCoordinate(xCoordinate, yCoordinate);
+      level.setIsHeadPlaced(true);
+      headTile = targetTile;
+      switch (subId) {
+      case "up":
+        level.setTile(xCoordinate, yCoordinate, LevelEditor.Sprites.HEAD_UP);
+        break;
+      case "down":
+        level.setTile(xCoordinate, yCoordinate, LevelEditor.Sprites.HEAD_DOWN);
+        break;
+      case "left":
+        level.setTile(xCoordinate, yCoordinate, LevelEditor.Sprites.HEAD_LEFT);
+        break;
+      case "right":
+        level.setTile(xCoordinate, yCoordinate, LevelEditor.Sprites.HEAD_RIGHT);
+        break;
+      }
+    } else if (tileId.equals("tail")) {
+      if (level.isTailPlaced() && tailTile != targetTile) {
+        if (tailTile == targetTile)
+          return;
+        tailTile.setImage(null);
+        level.removeTile(level.getTailTileCoordinateX(), level.getTailTileCoordinateY());
+      }
+      level.setTailTileCoordinate(xCoordinate, yCoordinate);
+      level.setIsTailPlaced(true);
+      tailTile = targetTile;
+      switch (subId) {
+      case "up":
+        level.setTile(xCoordinate, yCoordinate, LevelEditor.Sprites.TAIL_UP);
+        break;
+      case "down":
+        level.setTile(xCoordinate, yCoordinate, LevelEditor.Sprites.TAIL_DOWN);
+        break;
+      case "left":
+        level.setTile(xCoordinate, yCoordinate, LevelEditor.Sprites.TAIL_LEFT);
+        break;
+      case "right":
+        level.setTile(xCoordinate, yCoordinate, LevelEditor.Sprites.TAIL_RIGHT);
+        break;
+      }
+    } else if (tileId.equals("body")) {
+      if (headTile == targetTile) {
+        level.setHeadTileCoordinate(-1, -1);
+        level.setIsHeadPlaced(false);
+        headTile = null;
+      }
+      if (tailTile == targetTile) {
+        level.setTailTileCoordinate(-1, -1);
+        level.setIsTailPlaced(false);
+        tailTile = null;
+      }
+      switch (subId) {
+      case "horz":
+        level.setTile(xCoordinate, yCoordinate, LevelEditor.Sprites.BODY_HORIZONTAL);
+        break;
+      case "vert":
+        level.setTile(xCoordinate, yCoordinate, LevelEditor.Sprites.BODY_VERTICAL);
+        break;
+      case "ul":
+        level.setTile(xCoordinate, yCoordinate, LevelEditor.Sprites.BODY_UPLEFT);
+        break;
+      case "ur":
+        level.setTile(xCoordinate, yCoordinate, LevelEditor.Sprites.BODY_UPRIGHT);
+        break;
+      case "ru":
+        level.setTile(xCoordinate, yCoordinate, LevelEditor.Sprites.BODY_RIGHTUP);
+        break;
+      case "lu":
+        level.setTile(xCoordinate, yCoordinate, LevelEditor.Sprites.BODY_LEFTUP);
+        break;
+      }
+
+    } else if (tileId.equals("obst")) {
+      level.setTile(xCoordinate, yCoordinate, LevelEditor.Sprites.OBSTACLE);
+    }
+  }
 
   @FXML public void selectImage(ActionEvent ae) {
     FileChooser chooser = new FileChooser();
@@ -311,6 +397,7 @@ public class MainController {
       background.setImage(img);
       level.setBackgroundPath(selectedFile.getAbsolutePath());
       canvas.setBackground(new Background(new BackgroundImage(img, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, null, new BackgroundSize(100, 100, true, true, true, true))));
+      imageSelectedFlag[0] = true;
       break;
     case "Body":
       level.setBodyPath(selectedFile.getAbsolutePath());
@@ -333,7 +420,7 @@ public class MainController {
       bodyUpRight.setViewport(new Rectangle2D(bodyex.coordinates.get(12), bodyex.coordinates.get(13), bodyex.coordinates.get(14), bodyex.coordinates.get(15)));
       bodyDownLeft.setViewport(new Rectangle2D(bodyex.coordinates.get(16), bodyex.coordinates.get(17), bodyex.coordinates.get(18), bodyex.coordinates.get(19)));
       bodyDownRight.setViewport(new Rectangle2D(bodyex.coordinates.get(20), bodyex.coordinates.get(21), bodyex.coordinates.get(22), bodyex.coordinates.get(23)));
-
+      imageSelectedFlag[1] = true;
       break;
     case "Head":
       level.setHeadPath(selectedFile.getAbsolutePath());
@@ -352,6 +439,7 @@ public class MainController {
       headDown.setViewport(new Rectangle2D(headex.coordinates.get(4), headex.coordinates.get(5), headex.coordinates.get(6), headex.coordinates.get(7)));
       headLeft.setViewport(new Rectangle2D(headex.coordinates.get(8), headex.coordinates.get(9), headex.coordinates.get(10), headex.coordinates.get(11)));
       headRight.setViewport(new Rectangle2D(headex.coordinates.get(12), headex.coordinates.get(13), headex.coordinates.get(14), headex.coordinates.get(15)));
+      imageSelectedFlag[2] = true;
       break;
     case "Tail":
       level.setTailPath(selectedFile.getAbsolutePath());
@@ -370,6 +458,8 @@ public class MainController {
       tailDown.setViewport(new Rectangle2D(tailex.coordinates.get(4), tailex.coordinates.get(5), tailex.coordinates.get(6), tailex.coordinates.get(7)));
       tailLeft.setViewport(new Rectangle2D(tailex.coordinates.get(8), tailex.coordinates.get(9), tailex.coordinates.get(10), tailex.coordinates.get(11)));
       tailRight.setViewport(new Rectangle2D(tailex.coordinates.get(12), tailex.coordinates.get(13), tailex.coordinates.get(14), tailex.coordinates.get(15)));
+      imageSelectedFlag[3] = true;
+
       break;
     case "Obstacle":
       level.setObstaclePath(selectedFile.getAbsolutePath());
@@ -382,6 +472,8 @@ public class MainController {
       LevelEditorProperties.setProperty("obstacle", (obstex.coordinates.toString().substring(1, obstex.coordinates.toString().length() - 1)));
       obstacleTile.setImage(img);
       obstacleTile.setViewport(new Rectangle2D(obstex.coordinates.get(0), obstex.coordinates.get(1), obstex.coordinates.get(2), obstex.coordinates.get(3)));
+      imageSelectedFlag[4] = true;
+
       break;
     case "Food":
       level.setFoodPath(selectedFile.getAbsolutePath());
@@ -389,12 +481,18 @@ public class MainController {
       tmp = foodex.buildUI();
       tmp.initOwner(owner);
       tmp.showAndWait();
-      level.setCoordinates(foodex.coordinates, 2);
+      level.setCoordinates(foodex.coordinates, 3);
       LevelEditorProperties.setProperty("food", (foodex.coordinates.toString().substring(1, foodex.coordinates.toString().length() - 1)));
       food.setImage(img);
       food.setViewport(new Rectangle2D(foodex.coordinates.get(0), foodex.coordinates.get(1), foodex.coordinates.get(2), foodex.coordinates.get(3)));
+      imageSelectedFlag[5] = true;
       break;
     }
+    enableEvents = true;
+    for (boolean f : imageSelectedFlag)
+      enableEvents &= f;
+    if (enableEvents)
+      headUp.fireEvent(new MouseEvent(MouseEvent.MOUSE_CLICKED, 0, 0, 0, 0, MouseButton.PRIMARY, 1, true, true, true, true, true, true, true, true, true, true, null));
   }
 
   private void createAlertDialog(String title, String message) {
@@ -404,6 +502,7 @@ public class MainController {
     alert.setContentText(message);
     alert.showAndWait();
   }
+  @FXML MenuItem buildMI;
   @FXML Button backgroundButton, bodyButton, headButton, tailButton, obstacleButton, foodButton;
   @FXML BorderPane MainWindow;
   @FXML ImageView background, body, head, tail, obstacle, obstacleTile, food, headUp, headLeft, headRight, headDown, tailUp, tailLeft, tailRight, tailDown, bodyHorizontal, bodyVertical, bodyUpLeft, bodyUpRight, bodyDownLeft, bodyDownRight;
@@ -416,6 +515,10 @@ public class MainController {
   private final Image selImg = new Image("file:./Resources/selected.png");
   private Properties LevelEditorProperties = new Properties();
   private File propfile = new File("Editor.prop");
+  private ImageView lastDraggedTile;
+  private int xPrevDiff, yPrevDiff;
+  private boolean imageSelectedFlag[] = new boolean[6];
+  private boolean enableEvents;
 }
 
 class NewLevelDialogController {
@@ -608,6 +711,7 @@ class SpriteExtractor {
     });
     ok.setOnAction(new EventHandler<ActionEvent>() {
       public void handle(ActionEvent ae) {
+        check.fire();
         if (verified) {
           for (TextField t : arrayOfTextField) {
             coordinates.add(Integer.parseInt(t.getText()));

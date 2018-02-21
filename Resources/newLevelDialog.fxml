@@ -25,7 +25,7 @@
       <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
          <children>
             <Label text="Horizontal Tiles" />
-            <TextField fx:id="horizontalTiles" text="16" HBox.hgrow="ALWAYS">
+            <TextField fx:id="horizontalTiles" text="32" HBox.hgrow="ALWAYS">
                <HBox.margin>
                   <Insets left="20.0" />
                </HBox.margin>
@@ -41,7 +41,7 @@
       <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
          <children>
             <Label text="Vertical Tiles     " />
-            <TextField fx:id="verticalTiles" text="9" HBox.hgrow="ALWAYS">
+            <TextField fx:id="verticalTiles" text="18" HBox.hgrow="ALWAYS">
                <HBox.margin>
                   <Insets left="20.0" />
                </HBox.margin>
